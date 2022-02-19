@@ -1,10 +1,11 @@
 # minicom2
 
-[![windows](https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml/badge.svg)](https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml)
-[![linux](https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml/badge.svg)](https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml)
-[![license](https://img.shields.io/github/license/yhsb2k/minicom2?color=blue)](https://github.com/yhsb2k/minicom2/blob/master/LICENSE)
-
-Modern crossplatform serial terminal emulator
+<h3 align="center">Modern crossplatform serial terminal emulator</h3>
+<p align="center">
+<a href="https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml"><img src="https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml/badge.svg" alt="Windows build badge"></a>
+<a href="https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml"><img src="https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml/badge.svg" alt="Linux build badge"></a>
+<a href="https://github.com/yhsb2k/minicom2/blob/master/LICENSE"><img src="https://img.shields.io/github/license/yhsb2k/minicom2?color=blue" alt="License"></a>
+</p>
 
 ## How to build and launch
 ```
