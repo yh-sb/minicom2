@@ -1,7 +1,7 @@
 # minicom2
 
-[![windows](https://github.com/yhsb2k/minicom2/actions/workflows/build-windows.yml/badge.svg)](https://github.com/yhsb2k/minicom2/actions/workflows/build-windows.yml)
-[![linux](https://github.com/yhsb2k/minicom2/actions/workflows/build-linux.yml/badge.svg)](https://github.com/yhsb2k/minicom2/actions/workflows/build-linux.yml)
+[![windows](https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml/badge.svg)](https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml)
+[![linux](https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml/badge.svg)](https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml)
 [![license](https://img.shields.io/github/license/yhsb2k/minicom2?color=blue)](https://github.com/yhsb2k/minicom2/blob/master/LICENSE)
 
 Modern crossplatform serial terminal emulator
