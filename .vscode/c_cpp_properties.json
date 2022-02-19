@@ -1,0 +1,10 @@
+{
+    "configurations":
+    [
+        {
+            "name": "minicom2",
+            "compileCommands": "build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations":
+    [
+        {
+            "name": "gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/minicom2",
+            "miDebuggerPath": "gdb",
+            "cwd": "${workspaceFolder}",
+            "externalConsole": true,
+            "internalConsoleOptions": "neverOpen",
+            "preLaunchTask": "build",
+            "showDisplayString": true,
+            "visualizerFile": "${workspaceFolder}/.vscode/stl.gcc.natvis"
+        }
+    ]
+}
