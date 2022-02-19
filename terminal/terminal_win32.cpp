@@ -70,6 +70,10 @@ terminal_win32::terminal_win32()
     {
         throw std::runtime_error("Failed to get stdout console mode");
     }
+    
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x4 // Fix for GCC 8.1.0
+    #endif
     stdout_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     if(!SetConsoleMode(stdout_handle, stdout_mode))
     {
