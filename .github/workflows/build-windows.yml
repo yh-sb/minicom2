@@ -1,4 +1,4 @@
-name: build
+name: build-windows
 
 on: [push, pull_request]
 
@@ -11,20 +11,6 @@ jobs:
             [System.Net.WebClient]::new().downloadFile("https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip", "ninja-win.zip")
             [System.IO.Compression.ZipFile]::ExtractToDirectory("ninja-win.zip", "C:\ninja") | Remove-Item
             echo "C:\ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Checkout with submodules
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Build
-        run: make
-
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install dependencies
-        run: sudo apt update && sudo apt install ninja-build
 
       - name: Checkout with submodules
         uses: actions/checkout@v2
