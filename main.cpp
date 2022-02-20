@@ -2,6 +2,7 @@
 #include <memory>
 #include <thread>
 
+#include "cli_options.hpp"
 #include "event.hpp"
 #include "sync_queue.hpp"
 
@@ -91,14 +92,16 @@ void coordinator_thread(sync_queue<event> &events_queue,
 
 int main(int argc, char *argv[])
 {
+    cli_options opts(argc, argv);
+    
 #ifdef _WIN32
     std::shared_ptr<terminal> terminal = std::make_shared<terminal_win32>();
-    std::shared_ptr<serial> serial = std::make_shared<serial_win32>("COM4",
-        115200, 8, serial::parity::NONE, serial::stopbits::ONE,
-        serial::dtr::DISABLE, serial::rts::DISABLE);
+    std::shared_ptr<serial> serial = std::make_shared<serial_win32>(opts.device,
+        opts.baudrate, opts.databits, opts.parity, opts.stopbits, opts.dtr, opts.rts);
 #else
     std::shared_ptr<terminal> terminal = std::make_shared<terminal_posix>();
-    std::shared_ptr<serial> serial = std::make_shared<serial>(serial_posix("/dev/ttyUSB1"));
+    std::shared_ptr<serial> serial = std::make_shared<serial>(serial_posix(opts.device,
+        opts.baudrate, opts.databits, opts.parity, opts.stopbits, opts.dtr, opts.rts));
 #endif
     
     sync_queue<event> events_queue;

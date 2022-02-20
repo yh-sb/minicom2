@@ -7,6 +7,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/minicom2",
+            "args": ["COM4", "-b", "115200"],
             "miDebuggerPath": "gdb",
             "cwd": "${workspaceFolder}",
             "externalConsole": true,

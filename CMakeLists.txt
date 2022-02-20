@@ -7,8 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(serial)
 add_subdirectory(terminal)
+add_subdirectory(third_party/argh)
 
-add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+add_executable(${CMAKE_PROJECT_NAME} main.cpp cli_options.cpp)
 
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
@@ -18,6 +19,7 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
+        argh
         serial
         terminal
 )

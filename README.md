@@ -13,7 +13,7 @@ git clone --recursive https://github.com/yhsb2k/minicom2.git
 cd minicom2
 make
 
-build/minicom2
+build/minicom2 --help
 ```
 
 ## Requirements
