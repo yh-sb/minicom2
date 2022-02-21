@@ -62,11 +62,11 @@ public:
         type type;
         union
         {
-            key key;
-            mouse mouse;
-            window_resize window_resize;
-            // menu menu;
-            focus focus;
+            event::key key;
+            event::mouse mouse;
+            event::window_resize window_resize;
+            // event::menu menu;
+            event::focus focus;
         };
     };
     

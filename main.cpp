@@ -1,11 +1,10 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <variant>
 
 #include "cli_options.hpp"
-#include "event.hpp"
 #include "sync_queue.hpp"
-
 #include "serial_boost.hpp"
 #ifdef _WIN32
 #include "terminal_win32.hpp"
@@ -13,78 +12,76 @@
 #include "terminal_posix.hpp"
 #endif
 
+typedef std::variant<char, terminal::event> universal_event;
+
 void termianal_thread(std::shared_ptr<terminal> terminal,
-    sync_queue<event> &events_queue)
+    sync_queue<universal_event> &events_queue)
 {
     while(1)
     {
-        std::vector<terminal::event> terminal_events = terminal->read();
-        
-        for(terminal::event e : terminal_events)
+        for(auto &&e : terminal->read())
         {
-            events_queue << event(e);
+            events_queue << e;
         }
     }
 }
 
-void serial_thread(std::shared_ptr<serial> serial, sync_queue<event> &events_queue)
+void serial_thread(std::shared_ptr<serial> serial, sync_queue<universal_event> &events_queue)
 {
     while(1)
     {
-        std::vector<char> serial_events = serial->read();
-        
-        for(char e : serial_events)
+        for(char e : serial->read())
         {
-            events_queue << event(e);
+            events_queue << e;
         }
     }
 }
 
-void coordinator_thread(sync_queue<event> &events_queue,
+void coordinator_thread(sync_queue<universal_event> &events_queue,
     std::shared_ptr<terminal> terminal, std::shared_ptr<serial> serial)
 {
     while(1)
     {
-        event event = events_queue.pop();
+        universal_event event = events_queue.pop();
         
-        switch(event.type)
+        if(std::holds_alternative<char>(event))
         {
-            case event::type::TERMINAL:
-                if(event.terminal.type == terminal::event::type::KEY &&
-                    event.terminal.key.is_pressed)
-                {
-                    switch(event.terminal.key.key_code)
-                    {
-                        case 33: serial->write("\e[5~"); break;   // PAGE UP
-                        case 34: serial->write("\e[6~"); break;   // PAGE DOWN
-                        case 35: serial->write("\e[4~"); break;   // END
-                        case 36: serial->write("\e[1~"); break;   // HOME
-                        case 37: serial->write("\e[D"); break;    // LEFT
-                        case 38: serial->write("\e[A"); break;    // UP
-                        case 39: serial->write("\e[C"); break;    // RIGHT
-                        case 40: serial->write("\e[B"); break;    // DOWN
-                        case 45: serial->write("\e[2~"); break;   // INSERT
-                        case 46: serial->write("\e[3~"); break;   // DEL
-                        case 112: serial->write("\eOP"); break;   // F1
-                        case 113: serial->write("\eOQ"); break;   // F2
-                        case 114: serial->write("\eOR"); break;   // F3
-                        case 115: serial->write("\eOS"); break;   // F4
-                        case 116: serial->write("\e[16~"); break; // F5
-                        case 117: serial->write("\e[17~"); break; // F6
-                        case 118: serial->write("\e[18~"); break; // F7
-                        case 119: serial->write("\e[19~"); break; // F8
-                        case 120: serial->write("\e[20~"); break; // F9
-                        case 121: serial->write("\e[21~"); break; // F10
-                        case 122: serial->write("\e[23~"); break; // F11
-                        case 123: serial->write("\e[24~"); break; // F12
-                        default: serial->write(event.terminal.key.ascii_char);
-                    }
-                }
-                break;
+            terminal->write(std::get<char>(event));
+        }
+        else if(std::holds_alternative<terminal::event>(event))
+        {
+            terminal::event terminal_event = std::get<terminal::event>(event);
             
-            case event::type::SERIAL:
-                terminal->write(event.serial);
-                break;
+            if(terminal_event.type == terminal::event::type::KEY &&
+                terminal_event.key.is_pressed)
+            {
+                switch(terminal_event.key.key_code)
+                {
+                    case 33: serial->write("\e[5~"); break;   // PAGE UP
+                    case 34: serial->write("\e[6~"); break;   // PAGE DOWN
+                    case 35: serial->write("\e[4~"); break;   // END
+                    case 36: serial->write("\e[1~"); break;   // HOME
+                    case 37: serial->write("\e[D"); break;    // LEFT
+                    case 38: serial->write("\e[A"); break;    // UP
+                    case 39: serial->write("\e[C"); break;    // RIGHT
+                    case 40: serial->write("\e[B"); break;    // DOWN
+                    case 45: serial->write("\e[2~"); break;   // INSERT
+                    case 46: serial->write("\e[3~"); break;   // DEL
+                    case 112: serial->write("\eOP"); break;   // F1
+                    case 113: serial->write("\eOQ"); break;   // F2
+                    case 114: serial->write("\eOR"); break;   // F3
+                    case 115: serial->write("\eOS"); break;   // F4
+                    case 116: serial->write("\e[16~"); break; // F5
+                    case 117: serial->write("\e[17~"); break; // F6
+                    case 118: serial->write("\e[18~"); break; // F7
+                    case 119: serial->write("\e[19~"); break; // F8
+                    case 120: serial->write("\e[20~"); break; // F9
+                    case 121: serial->write("\e[21~"); break; // F10
+                    case 122: serial->write("\e[23~"); break; // F11
+                    case 123: serial->write("\e[24~"); break; // F12
+                    default: serial->write(terminal_event.key.ascii_char);
+                }
+            }
         }
     }
 }
@@ -102,7 +99,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<terminal> terminal = std::make_shared<terminal_posix>();
 #endif
     
-    sync_queue<event> events_queue;
+    sync_queue<universal_event> events_queue;
     
     std::thread terminal_trd(termianal_thread, terminal, std::ref(events_queue));
     std::thread serial_trd(serial_thread, serial, std::ref(events_queue));

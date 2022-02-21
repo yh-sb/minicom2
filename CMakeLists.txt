@@ -28,4 +28,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         argh
         serial
         terminal
+        $<$<PLATFORM_ID:Linux>:pthread>
 )
