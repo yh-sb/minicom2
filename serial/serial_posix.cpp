@@ -1,7 +1,8 @@
 #include "serial_posix.hpp"
 #include <stdexcept>
 
-serial_posix::serial_posix(std::string_view port_name)
+serial_posix::serial_posix(const std::string &port_name, size_t baudrate,
+    size_t databits, parity parity, stopbits stopbits, flowctrl flowctrl)
 {
     
 }

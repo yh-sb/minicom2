@@ -5,10 +5,10 @@
 #include <fileapi.h>
 #include <winbase.h>
 
-serial_win32::serial_win32(std::string_view port_name, size_t baudrate,
-    size_t databits, parity parity, stopbits stopbits, dtr dtr, rts rts)
+serial_win32::serial_win32(const std::string &port_name, size_t baudrate,
+    size_t databits, parity parity, stopbits stopbits, flowctrl flowctrl)
 {
-    std::string full_port_name = std::string("\\\\.\\") + port_name.data();
+    std::string full_port_name = std::string("\\\\.\\") + port_name;
     
     port_handle = CreateFileA(full_port_name.c_str(),
         GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING,
@@ -35,7 +35,7 @@ serial_win32::serial_win32(std::string_view port_name, size_t baudrate,
        DTR_CONTROL_ENABLE    0x1
        DTR_CONTROL_HANDSHAKE 0x2
     */
-    comport_settings.fDtrControl = static_cast<int>(dtr);
+    comport_settings.fDtrControl = static_cast<int>(flowctrl);
     
     comport_settings.fDsrSensitivity = false;  // DSR sensitivity
     comport_settings.fTXContinueOnXoff = true; // XOFF continues Tx
@@ -49,9 +49,10 @@ serial_win32::serial_win32(std::string_view port_name, size_t baudrate,
        RTS_CONTROL_HANDSHAKE 0x2
        RTS_CONTROL_TOGGLE    0x3
     */
-    comport_settings.fRtsControl = static_cast<int>(rts);
+    comport_settings.fRtsControl = static_cast<int>(flowctrl);
     
     comport_settings.fAbortOnError = false; // Do not abort reads/writes on error
+    
     comport_settings.ByteSize = databits;   // Number of bits in byte, 4-8
     
     /* NOPARITY    0

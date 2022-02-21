@@ -1,3 +1,6 @@
 [submodule "third_party/argh"]
 	path = third_party/argh
 	url = https://github.com/adishavit/argh.git
+[submodule "third_party/boost"]
+	path = third_party/boost
+	url = https://github.com/boostorg/boost.git

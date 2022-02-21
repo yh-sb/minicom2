@@ -21,30 +21,16 @@ public:
         TWO
     };
     
-    /**
-     * @brief DTR flow control
-     */
-    enum class dtr
+    enum class flowctrl
     {
-        DISABLE,
-        ENABLE,
-        HANDSHAKE
-    };
-    
-    /**
-     * @brief RTS flow control
-     */
-    enum class rts
-    {
-        DISABLE,
-        ENABLE,
-        HANDSHAKE,
-        TOGGLE
+        NONE, /// No flow control
+        HARDWARE, /// Hardware flow control (RTS/CTS)
+        SOFTWARE /// Software flow control (XON/XOFF)
     };
 
     virtual ~serial() {};
     virtual std::vector<char> read() = 0;
-    virtual void write(const std::vector<char> &data) = 0;
-    virtual void write(const char *data) = 0;
     virtual void write(char data) = 0;
+    virtual void write(const char *data) = 0;
+    virtual void write(const std::vector<char> &data) = 0;
 };

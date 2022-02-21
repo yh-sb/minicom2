@@ -6,11 +6,10 @@
 #include "event.hpp"
 #include "sync_queue.hpp"
 
+#include "serial_boost.hpp"
 #ifdef _WIN32
-#include "serial_win32.hpp"
 #include "terminal_win32.hpp"
 #else
-#include "serial_posix.hpp"
 #include "terminal_posix.hpp"
 #endif
 
@@ -94,14 +93,13 @@ int main(int argc, char *argv[])
 {
     cli_options opts(argc, argv);
     
+    std::shared_ptr<serial> serial = std::make_shared<serial_boost>(opts.device,
+        opts.baudrate, opts.databits, opts.parity, opts.stopbits, opts.flowctrl);
+    
 #ifdef _WIN32
     std::shared_ptr<terminal> terminal = std::make_shared<terminal_win32>();
-    std::shared_ptr<serial> serial = std::make_shared<serial_win32>(opts.device,
-        opts.baudrate, opts.databits, opts.parity, opts.stopbits, opts.dtr, opts.rts);
 #else
     std::shared_ptr<terminal> terminal = std::make_shared<terminal_posix>();
-    std::shared_ptr<serial> serial = std::make_shared<serial>(serial_posix(opts.device,
-        opts.baudrate, opts.databits, opts.parity, opts.stopbits, opts.dtr, opts.rts));
 #endif
     
     sync_queue<event> events_queue;

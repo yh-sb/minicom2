@@ -12,6 +12,5 @@ struct cli_options
     size_t databits;
     serial::parity parity;
     serial::stopbits stopbits;
-    serial::dtr dtr;
-    serial::rts rts;
+    serial::flowctrl flowctrl;
 };

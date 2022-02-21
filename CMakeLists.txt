@@ -9,6 +9,12 @@ add_subdirectory(serial)
 add_subdirectory(terminal)
 add_subdirectory(third_party/argh)
 
+if(MINGW)
+    # https://github.com/boostorg/fiber/pull/281
+    execute_process(COMMAND git -C third_party/boost/libs/fiber apply ../../../../mingw-fix-boost-fiber-build.patch ERROR_QUIET)
+endif()
+add_subdirectory(third_party/boost)
+
 add_executable(${CMAKE_PROJECT_NAME} main.cpp cli_options.cpp)
 
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE

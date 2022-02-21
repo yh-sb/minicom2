@@ -1,12 +1,14 @@
 #pragma once
 
 #include "serial.hpp"
-#include <string_view>
+#include <string>
 
 class serial_posix : public serial
 {
 public:
-    serial_posix(std::string_view port_name);
+    serial_posix(const std::string &port_name, size_t baudrate = 115200,
+        size_t databits = 8, parity parity = parity::NONE,
+        stopbits stopbits = stopbits::ONE, flowctrl flowctrl = flowctrl::NONE);
     ~serial_posix();
     
     std::vector<char> read() override;
