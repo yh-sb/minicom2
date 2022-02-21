@@ -1,7 +1,6 @@
 #include "terminal_win32.hpp"
 #include <iostream>
 #include <stdexcept>
-
 #include <fileapi.h>
 #include <winbase.h>
 #include <windows.h>
@@ -86,8 +85,6 @@ terminal_win32::terminal_win32()
 
 terminal_win32::~terminal_win32()
 {
-    //CloseHandle(stdin_handle);
-    //CloseHandle(stdout_handle);
 }
 
 std::vector<terminal::event> terminal_win32::read()

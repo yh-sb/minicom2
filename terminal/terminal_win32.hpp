@@ -1,8 +1,6 @@
 #pragma once
 
 #include "terminal.hpp"
-#include <string_view>
-//#include <winnt.h>
 #include <windows.h>
 
 class terminal_win32 : public terminal
