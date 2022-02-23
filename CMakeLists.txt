@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(serial)
 add_subdirectory(terminal)
-add_subdirectory(third_party/argh)
 
 if(MINGW)
     # https://github.com/boostorg/fiber/pull/281
@@ -25,8 +24,8 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
-        argh
         serial
         terminal
+        Boost::program_options
         $<$<PLATFORM_ID:Linux>:pthread>
 )
