@@ -14,7 +14,7 @@
 
 typedef std::variant<char, terminal::event> universal_event;
 
-void termianal_thread(std::shared_ptr<terminal> terminal,
+void terminal_thread(std::shared_ptr<terminal> terminal,
     sync_queue<universal_event> &events_queue)
 {
     while(1)
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     
     sync_queue<universal_event> events_queue;
     
-    std::thread terminal_trd(termianal_thread, terminal, std::ref(events_queue));
+    std::thread terminal_trd(terminal_thread, terminal, std::ref(events_queue));
     std::thread serial_trd(serial_thread, serial, std::ref(events_queue));
     std::thread coordinator_trd(coordinator_thread, std::ref(events_queue),
         terminal, serial);
