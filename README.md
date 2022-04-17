@@ -2,7 +2,7 @@
 
 <h3 align="center">Modern crossplatform serial terminal emulator</h3>
 <p align="center">
-<a href="https://github.com/yhsb2k/minicom2/actions/workflows/build.yml"><img src="https://github.com/yhsb2k/minicom2/actions/workflows/build.yml/badge.svg" alt="Build badge"></a>
+<a href="https://github.com/yhsb2k/minicom2/actions?workflow=build"><img src="https://github.com/yhsb2k/minicom2/workflows/build/badge.svg" alt="Build badge"></a>
 <a href="https://github.com/yhsb2k/minicom2/blob/master/LICENSE"><img src="https://img.shields.io/github/license/yhsb2k/minicom2?color=blue" alt="License"></a>
 </p>
 
