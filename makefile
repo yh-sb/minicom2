@@ -7,14 +7,14 @@ BUILD_TYPE ?= Debug
 all: gcc # Default toolchain
 
 gcc:
-	$(eval export CC = gcc)
-	$(eval export CXX = g++)
+	$(eval export CC ?= gcc)
+	$(eval export CXX ?= g++)
 	cmake . -B$(BUILD_DIR) -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 	cmake --build $(BUILD_DIR) -j
 
 clang:
-	$(eval export CC = clang)
-	$(eval export CXX = clang++)
+	$(eval export CC ?= clang)
+	$(eval export CXX ?= clang++)
 	cmake . -B$(BUILD_DIR) -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 	cmake --build $(BUILD_DIR) -j
 
