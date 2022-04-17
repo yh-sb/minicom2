@@ -1,18 +1,26 @@
+# This makefile is used to shorten build commands with various toolchains.
+# You can build the project without it, just calling the CMake manually.
+
 BUILD_DIR ?= build
 BUILD_TYPE ?= Debug
-CMAKE_GENERATOR ?= Ninja
 
-ifneq ($(OS),Windows_NT)
-NUMBER_OF_PROCESSORS = $(shell grep -c ^processor /proc/cpuinfo)
-endif
+all: gcc # Default toolchain
 
-# Set CMake toolchain
-export CC = gcc
-export CXX = g++
+gcc:
+	$(eval export CC = gcc)
+	$(eval export CXX = g++)
+	cmake . -B$(BUILD_DIR) -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	cmake --build $(BUILD_DIR) -j
 
-all:
-	cmake . -B$(BUILD_DIR) -G $(CMAKE_GENERATOR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
-	cmake --build $(BUILD_DIR) -j $(NUMBER_OF_PROCESSORS)
+clang:
+	$(eval export CC = clang)
+	$(eval export CXX = clang++)
+	cmake . -B$(BUILD_DIR) -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	cmake --build $(BUILD_DIR) -j
+
+msvc:
+	cmake . -B$(BUILD_DIR) -G "Visual Studio 17 2022"
+	cmake --build $(BUILD_DIR) -j --config $(BUILD_TYPE)
 
 clean:
-	@cmake -E remove_directory $(BUILD_DIR)
+	@cmake -E rm -rf $(BUILD_DIR)

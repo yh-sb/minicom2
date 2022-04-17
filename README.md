@@ -2,8 +2,7 @@
 
 <h3 align="center">Modern crossplatform serial terminal emulator</h3>
 <p align="center">
-<a href="https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml"><img src="https://github.com/yhsb2k/minicom2/actions/workflows/windows.yml/badge.svg" alt="Windows build badge"></a>
-<a href="https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml"><img src="https://github.com/yhsb2k/minicom2/actions/workflows/linux.yml/badge.svg" alt="Linux build badge"></a>
+<a href="https://github.com/yhsb2k/minicom2/actions/workflows/build.yml"><img src="https://github.com/yhsb2k/minicom2/actions/workflows/build.yml/badge.svg" alt="Build badge"></a>
 <a href="https://github.com/yhsb2k/minicom2/blob/master/LICENSE"><img src="https://img.shields.io/github/license/yhsb2k/minicom2?color=blue" alt="License"></a>
 </p>
 
@@ -18,7 +17,7 @@
 ```
 git clone --recursive https://github.com/yhsb2k/minicom2.git
 cd minicom2
-make
+make (gcc|clang|msvc)
 ```
 
 Since pseudo-graphical UI has not yet been integrated, it is possible to configure the serial port using command line options:
