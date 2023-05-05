@@ -3,18 +3,24 @@
     "configurations":
     [
         {
-            "name": "gdb",
+            "name": "GDB",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/minicom2",
             "args": ["COM4", "--baudrate", "115200", "--databits", "8", "--parity", "none", "--stopbits", "1", "--flowctrl", "none"],
+            "cwd": "${workspaceFolder}/build",
             "miDebuggerPath": "gdb",
-            "cwd": "${workspaceFolder}",
-            "externalConsole": true,
-            "internalConsoleOptions": "neverOpen",
-            "preLaunchTask": "build",
+            "preLaunchTask": "make gcc",
             "showDisplayString": true,
             "visualizerFile": "${workspaceFolder}/.vscode/stl.gcc.natvis"
+        },
+        {
+            "name": "MSVC",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/minicom2",
+            "cwd": "${workspaceFolder}/build",
+            "preLaunchTask": "make msvc"
         }
     ]
 }

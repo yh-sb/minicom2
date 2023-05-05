@@ -2,20 +2,22 @@
     "tasks":
     [
         {
-            "label": "build",
+            "label": "make gcc",
             "type": "shell",
             "command": "make",
-            "presentation":
-            {
-                "reveal": "silent",
-                "showReuseMessage": false
-            },
-            "group":
-            {
-                "kind": "build",
-                "isDefault": true
-            },
+            "args": [ "gcc" ],
+            "presentation": { "showReuseMessage": false, "clear": true },
+            "group": { "kind": "build" },
             "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "make msvc",
+            "type": "shell",
+            "command": "make",
+            "args": [ "msvc" ],
+            "presentation": { "showReuseMessage": false, "clear": true },
+            "group": { "kind": "build" },
+            "problemMatcher": ["$msCompile"]
         }
     ],
     "version": "2.0.0"

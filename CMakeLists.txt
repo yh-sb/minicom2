@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
 project(minicom2)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+
+# Statically link the runtime library if MSVC
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
 add_subdirectory(serial)
 add_subdirectory(terminal)
