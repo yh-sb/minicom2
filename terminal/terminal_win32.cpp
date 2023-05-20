@@ -96,7 +96,7 @@ std::vector<terminal::event> terminal_win32::read()
     
     // Read remaining events
     GetNumberOfConsoleInputEvents(stdin_handle, &events_count);
-    INPUT_RECORD events[events_count + 1] {first_event};
+    std::vector<INPUT_RECORD> events(events_count + 1, first_event);
     if(events_count)
     {
         ReadConsoleInput(stdin_handle, &events[1], events_count, &events_count);
@@ -110,10 +110,10 @@ std::vector<terminal::event> terminal_win32::read()
             case KEY_EVENT:
             {
                 KEY_EVENT_RECORD key_event = events[i].Event.KeyEvent;
-                terminal_events.push_back(event(key_event.bKeyDown,
+                terminal_events.push_back(events::key{ (bool)key_event.bKeyDown,
                     key_event.wVirtualKeyCode, key_event.wVirtualScanCode,
                     key_event.uChar.UnicodeChar, key_event.uChar.AsciiChar,
-                    key_event.wRepeatCount));
+                    key_event.wRepeatCount });
             }
             break;
             

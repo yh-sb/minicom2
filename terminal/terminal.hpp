@@ -1,27 +1,19 @@
 #pragma once
 
+#include <variant>
 #include <vector>
 #include <stdint.h>
 
 class terminal
 {
 public:
-    struct event
+    struct events
     {
-        enum class type
-        {
-            KEY,
-            MOUSE,
-            WINDOW_RESIZE,
-            //MENU, // What is it?
-            FOCUS
-        };
-        
         struct key
         {
             bool is_pressed;
-            uint16_t key_code;
-            uint16_t key_scan_code;
+            uint16_t code;
+            uint16_t scan_code;
             wchar_t unicode_char;
             char ascii_char;
             uint16_t repeat_count;
@@ -46,29 +38,9 @@ public:
         {
             bool is_focused;
         };
-        
-        event(bool is_pressed, uint16_t key_code, uint16_t key_scan_code,
-            wchar_t unicode_char, char ascii_char, uint16_t repeat_count)
-        {
-            type = type::KEY;
-            key.is_pressed = is_pressed;
-            key.key_code = key_code;
-            key.key_scan_code = key_scan_code;
-            key.unicode_char = unicode_char;
-            key.ascii_char = ascii_char;
-            key.repeat_count = repeat_count;
-        }
-        
-        type type;
-        union
-        {
-            event::key key;
-            event::mouse mouse;
-            event::window_resize window_resize;
-            // event::menu menu;
-            event::focus focus;
-        };
     };
+    
+    using event = std::variant<events::key, events::mouse, events::window_resize, events::focus>;
     
     virtual ~terminal() {};
     virtual std::vector<event> read() = 0;

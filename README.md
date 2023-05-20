@@ -14,14 +14,15 @@
 - [ ] Implement Ctrl+V feature
 
 ## How to build and launch
-```
+```powershell
 git clone --recursive https://github.com/yhsb2k/minicom2.git
 cd minicom2
-make (gcc|clang|msvc)
+make
+# or make msvc
 ```
 
 Since pseudo-graphical UI has not yet been integrated, it is possible to configure the serial port using command line options:
-```
+```powershell
 build/minicom2 --help
 
 Usage:
@@ -36,7 +37,7 @@ Options:
 ```
 
 ## Requirements
-* [GCC, Make](https://winlibs.com)
+* [GCC](https://winlibs.com)
 * [CMake](https://cmake.org/download)
 * [Ninja](https://ninja-build.org)
-* For Linux (apt): `apt install cmake ninja-build`
+* For Linux: `sudo apt install cmake g++ ninja-build`

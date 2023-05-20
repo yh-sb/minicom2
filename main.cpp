@@ -44,18 +44,16 @@ void coordinator_thread(sync_queue<universal_event> &events_queue,
     {
         universal_event event = events_queue.pop();
         
-        if(std::holds_alternative<char>(event))
+        if(char *byte = std::get_if<char>(&event))
         {
-            terminal->write(std::get<char>(event));
+            terminal->write(*byte);
         }
-        else if(std::holds_alternative<terminal::event>(event))
+        else if(terminal::event *terminal_event = std::get_if<terminal::event>(&event))
         {
-            terminal::event terminal_event = std::get<terminal::event>(event);
-            
-            if(terminal_event.type == terminal::event::type::KEY &&
-                terminal_event.key.is_pressed)
+            if(terminal::events::key *key = std::get_if<terminal::events::key>(terminal_event);
+                key && key->is_pressed)
             {
-                switch(terminal_event.key.key_code)
+                switch(key->code)
                 {
                     case 33: serial->write("\e[5~"); break;   // PAGE UP
                     case 34: serial->write("\e[6~"); break;   // PAGE DOWN
@@ -79,7 +77,7 @@ void coordinator_thread(sync_queue<universal_event> &events_queue,
                     case 121: serial->write("\e[21~"); break; // F10
                     case 122: serial->write("\e[23~"); break; // F11
                     case 123: serial->write("\e[24~"); break; // F12
-                    default: serial->write(terminal_event.key.ascii_char);
+                    default: serial->write(key->ascii_char);
                 }
             }
         }

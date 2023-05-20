@@ -16,8 +16,8 @@ gcc:
 
 msvc:
 	"$(shell ${ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere -latest -property installationPath)\VC\Auxiliary\Build\vcvarsall.bat" x64 && \
-	cmake . -B$(BUILD_DIR) -G Ninja && \
-	cmake --build $(BUILD_DIR) -j --config $(BUILD_TYPE)
+	cmake . -B$(BUILD_DIR) -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) && \
+	cmake --build $(BUILD_DIR) -j
 
 clean:
 	@cmake -E rm -rf $(BUILD_DIR)
