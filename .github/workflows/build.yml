@@ -56,7 +56,7 @@ jobs:
 
       - name: Build
         run: |
-          . cmd /s /c "`"$(. "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)\VC\Auxiliary\Build\vcvarsall.bat`" x64 > NUL && set" | Foreach-Object { $name, $value = $_ -split '=', 2; Set-Content env:\"$name" $value }
+          . cmd /s /c "`"$(. "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -prerelease -latest -property installationPath)\VC\Auxiliary\Build\vcvarsall.bat`" x64 > NUL && set" | Foreach-Object { $name, $value = $_ -split '=', 2; Set-Content env:\"$name" $value }
           cmake . -Bbuild -G Ninja -DCMAKE_BUILD_TYPE=Debug
           cmake --build build -j
 

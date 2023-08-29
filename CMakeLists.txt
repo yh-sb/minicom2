@@ -9,12 +9,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_subdirectory(serial)
 add_subdirectory(terminal)
 
-if(MINGW)
-    # https://github.com/boostorg/fiber/pull/281
-    execute_process(COMMAND git -C third_party/boost/libs/fiber apply ../../../../mingw-fix-boost-fiber-build.patch ERROR_QUIET)
-    # https://github.com/boostorg/stacktrace/issues/133
-    execute_process(COMMAND git -C third_party/boost/libs/stacktrace apply ../../../../mingw-fix-boost-stacktrace-gcc13.patch ERROR_QUIET)
-endif()
+set(BOOST_INCLUDE_LIBRARIES asio program_options)
 add_subdirectory(third_party/boost)
 
 add_executable(${CMAKE_PROJECT_NAME} main.cpp cli_options.cpp)
