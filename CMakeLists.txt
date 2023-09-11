@@ -25,3 +25,23 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         Boost::program_options
         $<$<PLATFORM_ID:Linux>:pthread>
 )
+
+# Deploy
+if(WIN32)
+    install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION .)
+else()
+    # Create AppImage
+    install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION "${CMAKE_BINARY_DIR}/appdir/usr/bin")
+    install(CODE "execute_process(
+        COMMAND linuxdeploy.AppImage --appdir appdir --desktop-file ${CMAKE_CURRENT_LIST_DIR}/app.desktop --icon-file ${CMAKE_CURRENT_LIST_DIR}/icon.png --output appimage
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMAND_ERROR_IS_FATAL ANY)"
+    )
+    # Get rid of hash and cpu arch in AppImage name
+    install(CODE "execute_process(
+        COMMAND sh -c \"mv ${CMAKE_PROJECT_NAME}*.AppImage ${CMAKE_PROJECT_NAME}.AppImage\"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMAND_ERROR_IS_FATAL ANY)"
+    )
+    install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.AppImage DESTINATION .)
+endif()

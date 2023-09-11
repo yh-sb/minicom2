@@ -11,18 +11,17 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache dependencies
+      - name: Cache MinGW-w64
         uses: actions/cache@v3
         id: cache
         with:
           key: ${{ runner.OS }}-cache-${{ hashFiles('.github/workflows/build.yml') }}
           path: C:/mingw64
 
-      - name: Install dependencies (if cache not found)
+      - name: Install MinGW-w64 (if cache not found)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          # Install MinGW-w64
-          curl.exe -L https://github.com/brechtsanders/winlibs_mingw/releases/download/13.1.0-16.0.2-11.0.0-ucrt-r1/winlibs-x86_64-mcf-seh-gcc-13.1.0-mingw-w64ucrt-11.0.0-r1.zip -o mingw64.zip
+          curl.exe -L https://github.com/brechtsanders/winlibs_mingw/releases/download/13.2.0-16.0.6-11.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-13.2.0-mingw-w64ucrt-11.0.0-r1.zip -o mingw64.zip
           tar -xf mingw64.zip -C C:\
           Copy-Item C:\mingw64\bin\mingw32-make.exe C:\mingw64\bin\make.exe
 
@@ -30,6 +29,7 @@ jobs:
         run: |
           $env:Path = "C:\mingw64\bin;" + $env:Path
           make
+          make install
 
       - name: Set artifacts suffix (if tag)
         if: startsWith(github.ref, 'refs/tags/') == true
@@ -39,11 +39,16 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') != true
         run: Add-Content $env:GITHUB_ENV "git_suffix=$(Write-Output "$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)")"
 
+      - name: Append branch name and hash to app filename
+        run: |
+          cd build/install
+          ren ${{github.event.repository.name}}.exe ${{github.event.repository.name}}-${{env.git_suffix}}.exe
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: minicom2-windows-${{env.git_suffix}}
-          path: build/minicom2.exe
+          name: ${{github.event.repository.name}}-windows-${{env.git_suffix}}
+          path: build/install/*
           if-no-files-found: error
 
   windows-msvc:
@@ -56,9 +61,7 @@ jobs:
 
       - name: Build
         run: |
-          . cmd /s /c "`"$(. "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -prerelease -latest -property installationPath)\VC\Auxiliary\Build\vcvarsall.bat`" x64 > NUL && set" | Foreach-Object { $name, $value = $_ -split '=', 2; Set-Content env:\"$name" $value }
-          cmake . -Bbuild -G Ninja -DCMAKE_BUILD_TYPE=Debug
-          cmake --build build -j
+          make msvc SHELL=cmd
 
   linux:
     runs-on: ubuntu-22.04
@@ -66,15 +69,34 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install g++ ninja-build
+          sudo apt install g++ ninja-build libfuse2
 
       - name: Checkout with submodules
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
+      - name: Cache linuxdeploy
+        uses: actions/cache@v3
+        id: cache
+        with:
+          key: ${{ runner.OS }}-cache-${{ hashFiles('.github/workflows/build.yml') }}
+          path: ~/bin/linuxdeploy.AppImage
+
+      - name: Install linuxdeploy (if cache not found)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/bin && cd $_
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20230713-1/linuxdeploy-x86_64.AppImage -O linuxdeploy.AppImage
+          chmod +x linuxdeploy.AppImage
+
       - name: Build
-        run: make
+        run: |
+          # Add linuxdeploy to PATH
+          export PATH=~/bin:$PATH
+          # Build
+          make
+          make install
 
       - name: Set artifacts suffix (if tag)
         if: startsWith(github.ref, 'refs/tags/') == true
@@ -84,9 +106,14 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') != true
         run: echo "git_suffix=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
+      - name: Append branch name and hash to .AppImage filename
+        run: |
+          cd build/install
+          mv *.AppImage $(basename *.AppImage .AppImage)-${{env.git_suffix}}.AppImage
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: minicom2-linux-${{env.git_suffix}}
-          path: build/minicom2
+          name: ${{github.event.repository.name}}-linux-${{env.git_suffix}}
+          path: build/install/*
           if-no-files-found: error

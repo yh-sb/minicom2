@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=minicom2
+Comment=Serial port communication
+Exec=minicom2 %F
+Terminal=false
+Categories=Utility;
+Icon=icon

@@ -4,7 +4,7 @@
 BUILD_DIR ?= build
 BUILD_TYPE ?= Debug
 
-.PHONY: gcc msvc clean
+.PHONY: gcc msvc install clean
 
 all: gcc # Default toolchain
 
@@ -18,6 +18,9 @@ msvc:
 	"$(shell ${ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere -prerelease -latest -property installationPath)\VC\Auxiliary\Build\vcvarsall.bat" x64 && \
 	cmake . -B$(BUILD_DIR) -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) && \
 	cmake --build $(BUILD_DIR) -j
+
+install:
+	cmake --install $(BUILD_DIR) --prefix $(BUILD_DIR)/install
 
 clean:
 	@cmake -E rm -rf $(BUILD_DIR)

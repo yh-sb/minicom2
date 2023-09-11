@@ -37,7 +37,16 @@ Options:
 ```
 
 ## Requirements
-* [GCC](https://winlibs.com)
+* [MinGW-w64](https://winlibs.com) or [MSVC](https://visualstudio.microsoft.com/free-developer-offers) or Linux GCC
 * [CMake](https://cmake.org/download)
 * [Ninja](https://ninja-build.org)
-* For Linux: `sudo apt install cmake g++ ninja-build`
+* For Linux:
+    ```bash
+    sudo apt update
+    sudo apt install cmake g++ ninja-build libfuse2
+    # Install linuxdeploy
+    mkdir -p ~/bin && cd $_
+    wget https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20230713-1/linuxdeploy-x86_64.AppImage -O linuxdeploy.AppImage
+    chmod +x linuxdeploy.AppImage
+    export PATH=~/bin:$PATH
+    ```
