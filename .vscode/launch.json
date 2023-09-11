@@ -11,6 +11,7 @@
             "cwd": "${workspaceFolder}/build",
             "miDebuggerPath": "gdb",
             "preLaunchTask": "make gcc",
+            "postDebugTask": "hide terminal",
             "showDisplayString": true,
             "visualizerFile": "${workspaceFolder}/.vscode/stl.gcc.natvis"
         },
@@ -20,7 +21,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/minicom2",
             "cwd": "${workspaceFolder}/build",
-            "preLaunchTask": "make msvc"
+            "preLaunchTask": "make msvc",
+            "postDebugTask": "hide terminal"
         }
     ]
 }
