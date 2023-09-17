@@ -3,6 +3,6 @@ Type=Application
 Name=minicom2
 Comment=Serial port communication
 Exec=minicom2 %F
-Terminal=false
+Terminal=true
 Categories=Utility;
 Icon=icon
