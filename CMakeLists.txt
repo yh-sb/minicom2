@@ -12,7 +12,11 @@ add_subdirectory(terminal)
 set(BOOST_INCLUDE_LIBRARIES asio program_options)
 add_subdirectory(third_party/boost)
 
-add_executable(${CMAKE_PROJECT_NAME} main.cpp cli_options.cpp)
+add_executable(${CMAKE_PROJECT_NAME}
+    main.cpp
+    cli_options.cpp
+    $<$<PLATFORM_ID:Windows>:${CMAKE_BINARY_DIR}/icon.rc>
+)
 
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-static-libgcc;-static-libstdc++;$<$<PLATFORM_ID:Windows>:-static>>
@@ -28,6 +32,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
 # Deploy
 if(WIN32)
+    # Create resource file to set .exe icon
+    file(WRITE ${CMAKE_BINARY_DIR}/icon.rc "IDI_ICON1 ICON DISCARDABLE \"${CMAKE_CURRENT_LIST_DIR}/icon.ico\"")
     install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION .)
 else()
     # Create AppImage
