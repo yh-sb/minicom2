@@ -2,22 +2,11 @@
     "tasks":
     [
         {
-            "label": "make gcc",
+            "label": "xmake",
             "type": "shell",
-            "command": "make",
-            "args": [ "gcc" ],
-            "presentation": { "showReuseMessage": false, "clear": true },
-            "group": { "kind": "build" },
-            "problemMatcher": ["$gcc"]
-        },
-        {
-            "label": "make msvc",
-            "type": "shell",
-            "command": "make",
-            "args": [ "msvc" ],
-            "presentation": { "showReuseMessage": false, "clear": true },
-            "group": { "kind": "build" },
-            "problemMatcher": ["$msCompile"]
+            "command": "xmake",
+            "presentation": { "showReuseMessage": false, "panel": "shared" },
+            "problemMatcher": ["$gcc", "$msCompile"]
         },
         {
             "label": "hide terminal",

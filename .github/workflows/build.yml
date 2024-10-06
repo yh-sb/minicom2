@@ -1,18 +1,28 @@
-name: build
+name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+      - '.vscode/**'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+      - '.vscode/**'
 
 jobs:
-  windows-gcc:
+  windows-mingw:
     runs-on: windows-latest
     steps:
       - name: Checkout with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Cache MinGW-w64
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           key: ${{ runner.OS }}-cache-${{ hashFiles('.github/workflows/build.yml') }}
@@ -21,36 +31,42 @@ jobs:
       - name: Install MinGW-w64 (if cache not found)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          curl.exe -L https://github.com/brechtsanders/winlibs_mingw/releases/download/13.2.0-16.0.6-11.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-13.2.0-mingw-w64ucrt-11.0.0-r1.zip -o mingw64.zip
-          tar -xf mingw64.zip -C C:\
-          Copy-Item C:\mingw64\bin\mingw32-make.exe C:\mingw64\bin\make.exe
+          curl.exe -L https://github.com/brechtsanders/winlibs_mingw/releases/download/15.0.0-snapshot20240616posix-12.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.0.0-snapshot20240616-mingw-w64ucrt-12.0.0-r1.7z -o mingw64.7z
+          Expand-7zipArchive -Path mingw64.7z -DestinationPath C:\
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
 
       - name: Build
         run: |
           $env:Path = "C:\mingw64\bin;" + $env:Path
-          make
-          make install
+          xmake config -p mingw -y
+          xmake
 
       - name: clang-tidy
         run: ./check.ps1
 
-      - name: Set artifacts suffix (if tag)
-        if: startsWith(github.ref, 'refs/tags/') == true
-        run: Add-Content $env:GITHUB_ENV "git_suffix=$(git describe --tags --abbrev=0)"
-
-      - name: Set artifacts suffix (if branch)
-        if: startsWith(github.ref, 'refs/tags/') != true
-        run: Add-Content $env:GITHUB_ENV "git_suffix=$(Write-Output "$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)")"
-
-      - name: Append branch name and hash to app filename
+      - name: Package to directory
         run: |
-          cd build/install
-          ren ${{github.event.repository.name}}.exe ${{github.event.repository.name}}-${{env.git_suffix}}.exe
+          # Copy all required files to app binary directory
+          xmake install -o build/install -v
+          
+          # Get git branch+hash or release tag
+          if ($env:GITHUB_REF.StartsWith('refs/tags/')) {
+              $git_artifact_suffix = git describe --tags --abbrev=0
+          } else {
+              $git_artifact_suffix = "$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          }
+          Add-Content -Path $env:GITHUB_ENV -Value "git_artifact_suffix=$git_artifact_suffix"
+          
+          # Rename binary dir and append branch+hash or release tag
+          ren build/install/bin minicom2-$git_artifact_suffix-x64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{github.event.repository.name}}-windows-${{env.git_suffix}}
+          name: minicom2-${{env.git_artifact_suffix}}-windows-x64
           path: build/install/*
           if-no-files-found: error
 
@@ -58,71 +74,78 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
       - name: Build
-        run: |
-          make msvc SHELL=cmd
+        run: xmake -y
 
       - name: clang-tidy
         run: ./check.ps1
 
-  linux:
+  linux-gcc:
     runs-on: ubuntu-22.04
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install g++ ninja-build libfuse2
-
       - name: Checkout with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install libfuse2
+
       - name: Cache linuxdeploy
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           key: ${{ runner.OS }}-cache-${{ hashFiles('.github/workflows/build.yml') }}
-          path: ~/bin/linuxdeploy.AppImage
+          path: ~/.local/bin/linuxdeploy
 
       - name: Install linuxdeploy (if cache not found)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ~/bin && cd $_
-          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20230713-1/linuxdeploy-x86_64.AppImage -O linuxdeploy.AppImage
-          chmod +x linuxdeploy.AppImage
+          mkdir -p ~/.local/bin && cd $_
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-static-x86_64.AppImage -O linuxdeploy
+          chmod +x linuxdeploy
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
 
       - name: Build
-        run: |
-          # Add linuxdeploy to PATH
-          export PATH=~/bin:$PATH
-          # Build
-          make
-          make install
+        run: xmake -y
 
       - name: clang-tidy
         run: ./check.sh
 
-      - name: Set artifacts suffix (if tag)
-        if: startsWith(github.ref, 'refs/tags/') == true
-        run: echo "git_suffix=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-
-      - name: Set artifacts suffix (if branch)
-        if: startsWith(github.ref, 'refs/tags/') != true
-        run: echo "git_suffix=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Append branch name and hash to .AppImage filename
+      - name: Package to .AppImage
         run: |
-          cd build/install
-          mv *.AppImage $(basename *.AppImage .AppImage)-${{env.git_suffix}}.AppImage
+          # Create AppImage
+          xmake install -o build/appdir/usr -v
+          cd build
+          xrepo env linuxdeploy --appdir appdir --desktop-file ../app.desktop --icon-file ../icon.png --output appimage
+          
+          # Get git branch+hash or release tag
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              git_artifact_suffix=$(git describe --tags --abbrev=0)
+          else
+              git_artifact_suffix="$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          fi
+          echo "git_artifact_suffix=$git_artifact_suffix" >> $GITHUB_ENV
+          
+          # Append branch name and hash (or release tag) to .AppImage filename
+          mv *.AppImage $(basename *.AppImage -x86_64.AppImage)-$git_artifact_suffix-x64.AppImage
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{github.event.repository.name}}-linux-${{env.git_suffix}}
-          path: build/install/*
+          name: minicom2-${{env.git_artifact_suffix}}-linux-x64
+          path: build/*.AppImage
           if-no-files-found: error

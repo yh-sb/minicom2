@@ -10,7 +10,7 @@
             "args": ["COM4", "--baudrate", "115200", "--databits", "8", "--parity", "none", "--stopbits", "1", "--flowctrl", "none"],
             "cwd": "${workspaceFolder}/build",
             "miDebuggerPath": "gdb",
-            "preLaunchTask": "make gcc",
+            "preLaunchTask": "xmake",
             "postDebugTask": "hide terminal",
             "showDisplayString": true,
             "visualizerFile": "${workspaceFolder}/.vscode/stl.gcc.natvis"
@@ -21,7 +21,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/minicom2",
             "cwd": "${workspaceFolder}/build",
-            "preLaunchTask": "make msvc",
+            "preLaunchTask": "xmake",
             "postDebugTask": "hide terminal"
         }
     ]
