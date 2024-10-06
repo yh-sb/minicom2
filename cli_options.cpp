@@ -2,6 +2,8 @@
 #include "cli_options.hpp"
 #include <boost/program_options.hpp>
 
+namespace
+{
 void print_usage()
 {
     std::cout << "Usage:\tminicom2 <device> [options]" << std::endl;
@@ -17,8 +19,12 @@ void print_options()
     "\t-s, --stopbits    Number of stopbits (1, 1.5|1,5, 2). Default is 1\n"\
     "\t-f, --flowctrl    Flow control type (none, hardware|hw, software|sw). Default is none" << std::endl;
 }
+} // namespace
 
-cli_options::cli_options(int argc, char *argv[])
+// NOLINTNEXTLINE(modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays)
+cli_options::cli_options(int argc, char *argv[]) :
+    baudrate(0), databits(0), parity(serial::parity::NONE),
+    stopbits(serial::stopbits::ONE), flowctrl(serial::flowctrl::NONE)
 {
     std::string parity_str, stopbits_str, flowctrl_str;
     
@@ -35,31 +41,22 @@ cli_options::cli_options(int argc, char *argv[])
     pos_desc.add("device", 1);
     
     boost::program_options::variables_map opts;
-    try
-    {
-        boost::program_options::store(boost::program_options::command_line_parser(
-            argc, argv).options(desc).positional(pos_desc).run(), opts);
-        boost::program_options::notify(opts);
-    }
-    catch(const std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-        exit(1);
-    }
+    
+    boost::program_options::store(boost::program_options::command_line_parser(
+        argc, argv).options(desc).positional(pos_desc).run(), opts);
+    boost::program_options::notify(opts);
     
     if(opts.count("help") || argc == 1)
     {
         print_usage();
         print_options();
-        exit(0);
+        std::exit(EXIT_SUCCESS); // NOLINT(concurrency-mt-unsafe)
     }
     
     if(!opts.count("device")) // Mandatory option
     {
-        std::cerr << "Wrong device name: \"\". Must be valid serial device name. "\
-            "Example: COM4 or /dev/ttyUSB1" << std::endl;
-        print_usage();
-        exit(1);
+        throw std::runtime_error(std::string("Wrong device name: \"\". Must be valid serial device name. "\
+            "Example: COM4 or /dev/ttyUSB1"));
     }
     device = opts["device"].as<std::string>();
     
@@ -68,7 +65,7 @@ cli_options::cli_options(int argc, char *argv[])
     {
         std::cerr << "Wrong baudrate value: \"" << baudrate << "\". "\
             "Must be in range: 900 - 3000000" << std::endl;
-        exit(1);
+        throw std::runtime_error(std::string("Wrong baudrate value: ..."));
     }
     
     // Databits validation
@@ -76,18 +73,18 @@ cli_options::cli_options(int argc, char *argv[])
     {
         std::cerr << "Wrong databits value: \"" << databits << "\". "\
             "Must be in range: 5 - 8" << std::endl;
-        exit(1);
+        throw std::runtime_error(std::string("Wrong databits value: ..."));
     }
     
     // Parity validation
     std::map<std::string, serial::parity> parity_vals {
         {"none", serial::parity::NONE}, {"odd", serial::parity::ODD},
         {"even", serial::parity::EVEN}};
-    if(!parity_vals.count(parity_str))
+    if(!parity_vals.contains(parity_str))
     {
         std::cerr << "Wrong parity value: \"" << parity_str << "\". "\
             "Must be one of the following: none, odd, even" << std::endl;
-        exit(1);
+        throw std::runtime_error(std::string("Wrong parity value: ..."));
     }
     parity = parity_vals[parity_str];
     
@@ -95,11 +92,11 @@ cli_options::cli_options(int argc, char *argv[])
     std::map<std::string, serial::stopbits> stopbits_vals {
         {"1", serial::stopbits::ONE}, {"1.5", serial::stopbits::ONE_AND_HALF},
         {"1,5", serial::stopbits::ONE_AND_HALF}, {"2", serial::stopbits::TWO}};
-    if(!stopbits_vals.count(stopbits_str))
+    if(!stopbits_vals.contains(stopbits_str))
     {
         std::cerr << "Wrong stopbits value: \"" << stopbits_str << "\". "\
             "Must be one of the following: 1, 1.5|1,5, 2" << std::endl;
-        exit(1);
+        throw std::runtime_error(std::string("Wrong stopbits value: ..."));
     }
     stopbits = stopbits_vals[stopbits_str];
     
@@ -108,11 +105,11 @@ cli_options::cli_options(int argc, char *argv[])
         {"none", serial::flowctrl::NONE}, {"hardware", serial::flowctrl::HARDWARE},
         {"hw", serial::flowctrl::HARDWARE}, {"software", serial::flowctrl::SOFTWARE},
         {"sw", serial::flowctrl::SOFTWARE}};
-    if(!flowctrl_vals.count(flowctrl_str))
+    if(!flowctrl_vals.contains(flowctrl_str))
     {
         std::cerr << "Wrong flow control value: \"" << flowctrl_str << "\". "\
             "Must be one of the following: none, hardware|hw, software|sw" << std::endl;
-        exit(1);
+        throw std::runtime_error(std::string("Wrong flow control value: ..."));
     }
     flowctrl = flowctrl_vals[flowctrl_str];
 }

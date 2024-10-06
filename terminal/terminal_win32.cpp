@@ -5,9 +5,11 @@
 #include <winbase.h>
 #include <windows.h>
 
-BOOL WINAPI ctrl_handler(DWORD CtrlType)
+namespace
 {
-    switch(CtrlType)
+BOOL WINAPI ctrl_handler(DWORD ctrl_type)
+{
+    switch(ctrl_type)
     {
         case CTRL_C_EVENT:
             std::cout << "CTRL_C_EVENT" << std::endl;
@@ -28,10 +30,14 @@ BOOL WINAPI ctrl_handler(DWORD CtrlType)
         case CTRL_SHUTDOWN_EVENT:
             std::cout << "CTRL_SHUTDOWN_EVENT" << std::endl;
             break;
+        
+        default:
+            return false; // Pass the event to the other handlers
     }
     
     return true;
 }
+} // namespace
 
 terminal_win32::terminal_win32()
 {
@@ -46,13 +52,13 @@ terminal_win32::terminal_win32()
         throw std::runtime_error("Failed to get stdin handle");
     }
     
-    DWORD stdin_mode;
+    DWORD stdin_mode = 0;
     if(!GetConsoleMode(stdin_handle, &stdin_mode))
     {
         throw std::runtime_error("Failed to get stdin console mode");
     }
     // Process Ctrl+C, Backspace, Carriage return and Line feed as normal input
-    stdin_mode &= ~(ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+    stdin_mode &= ~(ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT); // NOLINT(hicpp-signed-bitwise)
     if(!SetConsoleMode(stdin_handle, stdin_mode))
     {
         throw std::runtime_error("Failed to set stdin console mode");
@@ -64,7 +70,7 @@ terminal_win32::terminal_win32()
         throw std::runtime_error("Failed to get stdout handle");
     }
     
-    DWORD stdout_mode;
+    DWORD stdout_mode = 0;
     if(!GetConsoleMode(stdout_handle, &stdout_mode))
     {
         throw std::runtime_error("Failed to get stdout console mode");
@@ -79,12 +85,8 @@ terminal_win32::terminal_win32()
         throw std::runtime_error("Failed to set stdout console mode");
     }
     
-    CONSOLE_CURSOR_INFO cursor_info { .dwSize = 100, .bVisible = true};
+    const CONSOLE_CURSOR_INFO cursor_info { .dwSize = 100, .bVisible = true};
     SetConsoleCursorInfo(stdout_handle, &cursor_info);
-}
-
-terminal_win32::~terminal_win32()
-{
 }
 
 std::vector<terminal::event> terminal_win32::read()
@@ -105,25 +107,29 @@ std::vector<terminal::event> terminal_win32::read()
     std::vector<event> terminal_events;
     for(unsigned int i = 0; i < (events_count + 1); i++)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-union-access)
         switch(events[i].EventType)
         {
             case KEY_EVENT:
             {
-                KEY_EVENT_RECORD key_event = events[i].Event.KeyEvent;
-                terminal_events.push_back(events::key{ (bool)key_event.bKeyDown,
-                    key_event.wVirtualKeyCode, key_event.wVirtualScanCode,
-                    key_event.uChar.UnicodeChar, key_event.uChar.AsciiChar,
-                    key_event.wRepeatCount });
+                const KEY_EVENT_RECORD key_event = events[i].Event.KeyEvent;
+                terminal_events.emplace_back(events::key{
+                    .is_pressed = static_cast<bool>(key_event.bKeyDown),
+                    .code = key_event.wVirtualKeyCode,
+                    .scan_code = key_event.wVirtualScanCode,
+                    .unicode_char = key_event.uChar.UnicodeChar,
+                    .ascii_char = key_event.uChar.AsciiChar,
+                    .repeat_count = key_event.wRepeatCount });
             }
             break;
+            
+            case MOUSE_EVENT:
+                std::cout << "mouse event" << std::endl;
+                break;
             
             case WINDOW_BUFFER_SIZE_EVENT:
                 std::cout << "new window size: x=" << events[i].Event.WindowBufferSizeEvent.dwSize.X << \
                     " y=" << events[i].Event.WindowBufferSizeEvent.dwSize.Y << std::endl;
-                break;
-            
-            case MOUSE_EVENT:
-                std::cout << "mouse event" << std::endl;
                 break;
             
             case MENU_EVENT:
@@ -133,7 +139,11 @@ std::vector<terminal::event> terminal_win32::read()
             case FOCUS_EVENT:
                 std::cout << "focus event" << std::endl;
                 break;
+            
+            default:
+                break;
         }
+        // NOLINTEND(cppcoreguidelines-pro-type-union-access)
     }
     
     return terminal_events;
@@ -141,7 +151,7 @@ std::vector<terminal::event> terminal_win32::read()
 
 void terminal_win32::write(char byte)
 {
-    DWORD bytes_written;
+    DWORD bytes_written = 0;
     if(!WriteConsoleA(stdout_handle, &byte, sizeof(byte), &bytes_written, nullptr))
     {
         throw std::runtime_error(std::string("Failed to write to the console. GetLastError()=", GetLastError()));

@@ -31,6 +31,9 @@ jobs:
           make
           make install
 
+      - name: clang-tidy
+        run: ./check.ps1
+
       - name: Set artifacts suffix (if tag)
         if: startsWith(github.ref, 'refs/tags/') == true
         run: Add-Content $env:GITHUB_ENV "git_suffix=$(git describe --tags --abbrev=0)"
@@ -62,6 +65,9 @@ jobs:
       - name: Build
         run: |
           make msvc SHELL=cmd
+
+      - name: clang-tidy
+        run: ./check.ps1
 
   linux:
     runs-on: ubuntu-22.04
@@ -97,6 +103,9 @@ jobs:
           # Build
           make
           make install
+
+      - name: clang-tidy
+        run: ./check.sh
 
       - name: Set artifacts suffix (if tag)
         if: startsWith(github.ref, 'refs/tags/') == true

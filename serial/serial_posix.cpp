@@ -7,14 +7,9 @@ serial_posix::serial_posix(const std::string &port_name, size_t baudrate,
     
 }
 
-serial_posix::~serial_posix()
-{
-    
-}
-
 std::vector<char> serial_posix::read()
 {
-    
+    return {};
 }
 
 void serial_posix::write(const std::vector<char> &data)

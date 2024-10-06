@@ -5,6 +5,7 @@
 
 struct cli_options
 {
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays)
     cli_options(int argc, char *argv[]);
     
     std::string device;

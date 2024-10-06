@@ -1,0 +1,71 @@
+Checks: |
+  *
+  -llvmlibc-*
+  -llvm-include-order
+  -llvm-header-guard
+  -altera-*
+  -misc-unused-parameters
+  -misc-include-cleaner
+  -cppcoreguidelines-avoid-magic-numbers
+  -cppcoreguidelines-pro-type-vararg
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay
+  -readability-magic-numbers
+  -readability-uppercase-literal-suffix
+  -cert-dcl16-c
+  -readability-implicit-bool-conversion
+  -readability-identifier-length
+  -readability-isolate-declaration
+  -hicpp-uppercase-literal-suffix
+  -hicpp-vararg
+  -hicpp-no-array-decay
+  -modernize-use-trailing-return-type
+  -modernize-use-nodiscard
+  -performance-avoid-endl
+  -performance-enum-size
+  -fuchsia-default-arguments-calls
+  -fuchsia-default-arguments-declarations
+  -fuchsia-overloaded-operator
+  -google-readability-todo
+  -google-readability-avoid-underscore-in-googletest-name
+  
+  # Disable to avoid error in boost::asio. See https://github.com/chriskohlhoff/asio/pull/1539
+  -clang-analyzer-cplusplus.NewDelete
+  
+  readability-identifier-naming
+
+CheckOptions:
+  - key:   cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: true
+  - key:   hicpp-special-member-functions.AllowSoleDefaultDtor
+    value: true
+  - key:   modernize-avoid-c-arrays.AllowStringArrays
+    value: true
+  - key:   cppcoreguidelines-avoid-c-arrays.AllowStringArrays
+    value: true
+  - key:   hicpp-avoid-c-arrays.AllowStringArrays
+    value: true
+  - key:   cppcoreguidelines-rvalue-reference-param-not-moved.IgnoreNonDeducedTemplateTypes
+    value: true
+  - key:   bugprone-easily-swappable-parameters.MinimumLength
+    value: 6
+  - key:   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value: true
+  - key:   performance-unnecessary-value-param.AllowedTypes
+    value: 'std::shared_ptr'
+  - key:   readability-identifier-naming.ClassCase
+    value: lower_case
+  - key:   readability-identifier-naming.StructCase
+    value: lower_case
+  - key:   readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key:   readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key:   readability-identifier-naming.EnumCase
+    value: lower_case
+  - key:   readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key:   readability-identifier-naming.VariableCase
+    value: lower_case
+
+WarningsAsErrors: '*'
+UseColor:         true

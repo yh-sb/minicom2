@@ -3,7 +3,6 @@
 
 serial_boost::serial_boost(const std::string &port_name, size_t baudrate,
     size_t databits, parity parity, stopbits stopbits, flowctrl flowctrl) :
-    io(),
     serial(io, port_name)
 {
     serial.set_option(boost::asio::serial_port::baud_rate(baudrate));
@@ -16,14 +15,9 @@ serial_boost::serial_boost(const std::string &port_name, size_t baudrate,
         static_cast<boost::asio::serial_port::flow_control::type>(flowctrl)));
 }
 
-serial_boost::~serial_boost()
-{
-    
-}
-
 std::vector<char> serial_boost::read()
 {
-    char byte;
+    char byte = 0;
     boost::asio::read(serial, boost::asio::buffer(&byte, sizeof(byte)));
     
     std::vector<char> data;

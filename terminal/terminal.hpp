@@ -2,7 +2,7 @@
 
 #include <variant>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 class terminal
 {
@@ -42,7 +42,7 @@ public:
     
     using event = std::variant<events::key, events::mouse, events::window_resize, events::focus>;
     
-    virtual ~terminal() {};
+    virtual ~terminal() = default;
     virtual std::vector<event> read() = 0;
     virtual void write(char byte) = 0;
 };

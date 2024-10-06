@@ -28,7 +28,7 @@ public:
         SOFTWARE /// Software flow control (XON/XOFF)
     };
 
-    virtual ~serial() {};
+    virtual ~serial() = default;
     virtual std::vector<char> read() = 0;
     virtual void write(char data) = 0;
     virtual void write(const char *data) = 0;

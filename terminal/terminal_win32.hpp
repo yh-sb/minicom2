@@ -7,7 +7,7 @@ class terminal_win32 : public terminal
 {
 public:
     terminal_win32();
-    ~terminal_win32();
+    ~terminal_win32() override = default;
     
     std::vector<event> read() override;
     void write(char byte) override;

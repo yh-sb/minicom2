@@ -6,8 +6,8 @@
 class terminal_posix : public terminal
 {
 public:
-    terminal_posix();
-    ~terminal_posix();
+    terminal_posix() = default;
+    ~terminal_posix() override = default;
     
     std::vector<event> read() override;
     void write(char byte) override;

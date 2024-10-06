@@ -1,4 +1,5 @@
 #include "serial_win32.hpp"
+#include <array>
 #include <iostream>
 #include <stdexcept>
 
@@ -8,7 +9,7 @@
 serial_win32::serial_win32(const std::string &port_name, size_t baudrate,
     size_t databits, parity parity, stopbits stopbits, flowctrl flowctrl)
 {
-    std::string full_port_name = std::string("\\\\.\\") + port_name;
+    const std::string full_port_name = std::string(R"(\\.\)") + port_name;
     
     port_handle = CreateFileA(full_port_name.c_str(),
         GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING,
@@ -108,10 +109,11 @@ std::vector<char> serial_win32::read()
     {
         throw std::runtime_error("Failed to create event for reading");
     }
-    DWORD event_mask;
+    
+    DWORD event_mask = 0;
     if(!WaitCommEvent(port_handle, &event_mask, &overlapped))
     {
-        DWORD error = GetLastError();
+        const DWORD error = GetLastError();
         if(error != ERROR_IO_PENDING)
         {
             CloseHandle(overlapped.hEvent);
@@ -133,61 +135,75 @@ std::vector<char> serial_win32::read()
     
     if(event_mask & EV_ERR)
     {
-        DWORD errors;
+        DWORD errors = 0;
         COMSTAT stat;
         if(!ClearCommError(port_handle, &errors, &stat))
         {
             CloseHandle(overlapped.hEvent);
             throw std::runtime_error(std::string("Failed to clear serial port error. GetLastError()=", GetLastError()));
         }
-        
-        if(errors) // TODO: Why EV_ERR is present, but errors is 0 ?
-        {
-            std::cout << "\nSERIAL ERROR:";
-            if(errors & CE_RXOVER) { std::cout << " RXOVER" << std::endl; }
-            if(errors & CE_OVERRUN) { std::cout << " OVERRUN" << std::endl; }
-            if(errors & CE_RXPARITY) { std::cout << " RXPARITY" << std::endl; }
-            if(errors & CE_FRAME) { std::cout << " FRAME" << std::endl; }
-            if(errors & CE_BREAK) { std::cout << " BREAK" << std::endl; }
-            if(errors & CE_TXFULL) { std::cout << " TXFULL" << std::endl; }
-            if(errors & CE_PTO) { std::cout << " PTO" << std::endl; }
-            if(errors & CE_IOE) { std::cout << " IOE" << std::endl; }
-            if(errors & CE_DNS) { std::cout << " DNS" << std::endl; }
-            if(errors & CE_OOP) { std::cout << " OOP" << std::endl; }
-            if(errors & CE_MODE) { std::cout << " MODE" << std::endl; }
-        }
+        print_comm_errors(errors); // TODO: Why EV_ERR is present, but errors is 0 ?
     }
     
     std::vector<char> result_buff;
     if(event_mask & EV_RXCHAR)
     {
-        char buff[500];
-        DWORD bytes_read;
-        do
-        {
-            if(!ReadFile(port_handle, buff, sizeof(buff), &bytes_read, &overlapped))
-            {
-                DWORD error = GetLastError();
-                if(error != ERROR_IO_PENDING) // No data to read for now
-                {
-                    CloseHandle(overlapped.hEvent);
-                    throw std::runtime_error(std::string("Failed to read data from serial port. GetLastError()=", error));
-                }
-            }
-            
-            for(size_t i = 0; i < bytes_read; i++)
-            {
-                result_buff.push_back(buff[i]);
-            }
-            
-        } while(bytes_read > 0);
+        result_buff = read_serial_data(overlapped);
     }
+    
     if(event_mask & EV_TXEMPTY)
     {
         // Bytes sent
     }
     ResetEvent(overlapped.hEvent);
     CloseHandle(overlapped.hEvent);
+    
+    return result_buff;
+}
+
+void serial_win32::print_comm_errors(DWORD errors)
+{
+    if(errors)
+    {
+        std::cout << "\nSERIAL ERROR:";
+        if(errors & CE_RXOVER) { std::cout << " RXOVER" << std::endl; }
+        if(errors & CE_OVERRUN) { std::cout << " OVERRUN" << std::endl; }
+        if(errors & CE_RXPARITY) { std::cout << " RXPARITY" << std::endl; }
+        if(errors & CE_FRAME) { std::cout << " FRAME" << std::endl; }
+        if(errors & CE_BREAK) { std::cout << " BREAK" << std::endl; }
+        if(errors & CE_TXFULL) { std::cout << " TXFULL" << std::endl; }
+        if(errors & CE_PTO) { std::cout << " PTO" << std::endl; }
+        if(errors & CE_IOE) { std::cout << " IOE" << std::endl; }
+        if(errors & CE_DNS) { std::cout << " DNS" << std::endl; }
+        if(errors & CE_OOP) { std::cout << " OOP" << std::endl; }
+        if(errors & CE_MODE) { std::cout << " MODE" << std::endl; }
+    }
+}
+
+std::vector<char> serial_win32::read_serial_data(OVERLAPPED& overlapped)
+{
+    std::vector<char> result_buff;
+    std::array<char, 500> buff {};
+    DWORD bytes_read = 0;
+    
+    while(true)
+    {
+        if(!ReadFile(port_handle, buff.data(), sizeof(buff), &bytes_read, &overlapped))
+        {
+            const DWORD error = GetLastError();
+            if(error != ERROR_IO_PENDING) // No data to read for now
+            {
+                CloseHandle(overlapped.hEvent);
+                throw std::runtime_error(std::string("Failed to read data from serial port. GetLastError()=", error));
+            }
+        }
+        
+        if(bytes_read == 0)
+        {
+            break;
+        }
+        result_buff.insert(result_buff.end(), buff.begin(), buff.begin() + bytes_read);
+    }
     
     return result_buff;
 }
@@ -203,7 +219,7 @@ void serial_win32::write(const std::vector<char> &data)
     DWORD bytes_written = 0;
     if(!WriteFile(port_handle, data.data(), data.size(), &bytes_written, &overlapped))
     {
-        DWORD error = GetLastError();
+        const DWORD error = GetLastError();
         if(error != ERROR_IO_PENDING)
         {
             CloseHandle(overlapped.hEvent);
@@ -225,7 +241,7 @@ void serial_win32::write(const char *data)
     DWORD bytes_written = 0;
     if(!WriteFile(port_handle, data, strlen(data), &bytes_written, &overlapped))
     {
-        DWORD error = GetLastError();
+        const DWORD error = GetLastError();
         if(error != ERROR_IO_PENDING)
         {
             CloseHandle(overlapped.hEvent);
@@ -247,7 +263,7 @@ void serial_win32::write(char data)
     DWORD bytes_written = 0;
     if(!WriteFile(port_handle, &data, sizeof(data), &bytes_written, &overlapped))
     {
-        DWORD error = GetLastError();
+        const DWORD error = GetLastError();
         if(error != ERROR_IO_PENDING)
         {
             CloseHandle(overlapped.hEvent);

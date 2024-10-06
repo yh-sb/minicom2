@@ -6,10 +6,10 @@
 class serial_boost : public serial
 {
 public:
-    serial_boost(const std::string &port_name, size_t baudrate = 115200,
+    explicit serial_boost(const std::string &port_name, size_t baudrate = 115200,
         size_t databits = 8, parity parity = parity::NONE,
         stopbits stopbits = stopbits::ONE, flowctrl flowctrl = flowctrl::NONE);
-    ~serial_boost();
+    ~serial_boost() override = default;
     
     std::vector<char> read() override;
     void write(const std::vector<char> &data) override;
