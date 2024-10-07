@@ -21,18 +21,25 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache MinGW-w64
+      - name: Cache MinGW-w64 and Clang
         uses: actions/cache@v4
         id: cache
         with:
           key: ${{ runner.OS }}-cache-${{ hashFiles('.github/workflows/build.yml') }}
-          path: C:/mingw64
+          path: |
+            C:/mingw64
+            C:/Clang
 
-      - name: Install MinGW-w64 (if cache not found)
+      - name: Install MinGW-w64 and Clang (if cache not found)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
+          # MinGW-w64
           curl.exe -L https://github.com/brechtsanders/winlibs_mingw/releases/download/15.0.0-snapshot20240616posix-12.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.0.0-snapshot20240616-mingw-w64ucrt-12.0.0-r1.7z -o mingw64.7z
           Expand-7zipArchive -Path mingw64.7z -DestinationPath C:\
+          
+          # Clang
+          curl.exe -L https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.1/LLVM-19.1.1-win64.exe -o LLVM.exe
+          Start-Process -Wait -NoNewWindow -FilePath .\LLVM.exe -ArgumentList "/S /D=C:\Clang"
 
       - uses: xmake-io/github-action-setup-xmake@v1
         with:
@@ -45,7 +52,9 @@ jobs:
           xmake
 
       - name: clang-tidy
-        run: ./check.ps1
+        run: |
+          $env:Path = "C:\Clang\bin;" + $env:Path
+          ./check.ps1
 
       - name: Package to directory
         run: |

@@ -3,6 +3,7 @@
 #include <variant>
 #include <vector>
 #include <cstdint>
+#include <cstddef>
 
 class terminal
 {

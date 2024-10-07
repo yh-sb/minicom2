@@ -2,7 +2,7 @@
 
 set -e
 
-srcs=$(git ls-files '*.c' '*.cc' '*.cpp' '*.cxx' '*.c++' '*.h' '*.hpp' '*.hh')
+srcs=$(git ls-files '*.c' '*.cc' '*.cpp' '*.cxx' '*.c++' '*.h' '*.hpp' '*.hh' | grep -v 'win32\.\(c\|cc\|cpp\|cxx\|c++\|h\|hpp\|hh\)$')
 srcs=${srcs//$'\n'/ }
 
 GREEN='\033[0;32m'

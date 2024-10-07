@@ -94,9 +94,9 @@ int main(int argc, char *argv[])
         opts.baudrate, opts.databits, opts.parity, opts.stopbits, opts.flowctrl);
     
 #ifdef _WIN32
-    std::unique_ptr<terminal> terminal = std::make_unique<terminal_win32>();
+    const std::unique_ptr<terminal> terminal = std::make_unique<terminal_win32>();
 #else
-    std::unique_ptr<terminal> terminal = std::make_unique<terminal_posix>();
+    const std::unique_ptr<terminal> terminal = std::make_unique<terminal_posix>();
 #endif
     
     sync_queue<universal_event> events_queue;
