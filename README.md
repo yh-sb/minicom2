@@ -36,8 +36,3 @@ Options:
 ## Requirements
 * [MinGW-w64](https://winlibs.com) or [MSVC](https://visualstudio.microsoft.com/free-developer-offers) or Linux GCC
 * [Xmake](https://xmake.io/#/guide/installation)
-* For Linux:
-    ```bash
-    sudo apt update
-    sudo apt install libfuse2
-    ```
