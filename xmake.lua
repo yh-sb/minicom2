@@ -3,8 +3,7 @@ set_defaultmode("debug")
 set_targetdir("$(buildir)")
 set_languages("c++20")
 
-if is_plat("windows") or is_plat("mingw") then
-    add_syslinks("ws2_32", "wsock32")
+if is_plat("mingw") then
     add_ldflags("-static")
 end
 
@@ -19,6 +18,7 @@ target("minicom2")
         "cli_options.cpp"
     )
     
-    if is_plat("mingw") or is_plat("windows") then
+    if is_plat("mingw", "windows") then
+        add_syslinks("ws2_32", "wsock32")
         add_files("icon.rc")
     end
