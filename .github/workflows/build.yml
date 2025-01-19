@@ -158,3 +158,44 @@ jobs:
           name: minicom2-${{env.git_artifact_suffix}}-linux-x64
           path: build/*.AppImage
           if-no-files-found: error
+
+  macos-clang:
+    runs-on: macos-15
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Clang and xmake
+        run: |
+          brew update
+          brew install llvm xmake
+
+      - name: Build
+        run: |
+          export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+          export CC=/opt/homebrew/opt/llvm/bin/clang
+          export CXX=/opt/homebrew/opt/llvm/bin/clang++
+          xmake -y
+
+      - name: clang-tidy
+        run: |
+          export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+          ./check.sh
+
+      - name: Get git branch+hash or release tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              git_artifact_suffix=$(git describe --tags --abbrev=0)
+          else
+              git_artifact_suffix="$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          fi
+          echo "git_artifact_suffix=$git_artifact_suffix" >> $GITHUB_ENV
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: minicom2-${{env.git_artifact_suffix}}-macos
+          path: build/minicom2
+          if-no-files-found: error

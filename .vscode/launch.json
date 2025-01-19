@@ -3,6 +3,18 @@
     "configurations":
     [
         {
+            "name": "Clang",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "lldb",
+            "osx": { "targetArchitecture": "arm64" },
+            "program": "${workspaceFolder}/build/minicom2",
+            "args": ["/dev/cu.usbserial-210292AD33E90", "--baudrate", "115200", "--databits", "8", "--parity", "none", "--stopbits", "1", "--flowctrl", "none"],
+            "cwd": "${workspaceFolder}/build",
+            "preLaunchTask": "xmake",
+            "postDebugTask": "hide terminal"
+        },
+        {
             "name": "GDB",
             "type": "cppdbg",
             "request": "launch",

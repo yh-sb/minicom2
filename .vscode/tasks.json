@@ -5,7 +5,9 @@
             "label": "xmake",
             "type": "shell",
             "command": "xmake",
-            "presentation": { "showReuseMessage": false, "panel": "shared" },
+            "args": ["-y"],
+            "presentation": { "showReuseMessage": false, "clear": true },
+            "group": { "kind": "build" },
             "problemMatcher": ["$gcc", "$msCompile"]
         },
         {

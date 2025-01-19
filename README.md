@@ -13,13 +13,13 @@ Modern crossplatform serial terminal emulator
 - [ ] Implement Ctrl+V feature
 
 ## How to build and launch
-```powershell
+```sh
 xmake -y
 xmake run
 ```
 
 Since pseudo-graphical UI has not yet been integrated, it is possible to configure the serial port using command line options:
-```powershell
+```sh
 build/minicom2 --help
 
 Usage:
@@ -34,5 +34,11 @@ Options:
 ```
 
 ## Requirements
-* [MinGW-w64](https://winlibs.com) or [MSVC](https://visualstudio.microsoft.com/free-developer-offers) or Linux GCC
-* [Xmake](https://xmake.io/#/guide/installation)
+* [xmake](https://xmake.io/#/guide/installation)
+* For Windows: [MinGW-w64](https://winlibs.com) or [MSVC](https://visualstudio.microsoft.com/free-developer-offers)
+* For Linux: `sudo apt install g++` or `clang`
+* For macOS:
+  ```sh
+  brew install llvm
+  echo -e 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"\nexport CC=clang\nexport CXX=clang++' >> ~/.bash_profile # or ~/.zshrc
+  ```
